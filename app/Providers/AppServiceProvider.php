@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (config('view.compiled') === '/tmp') {
+            if (!is_dir('/tmp/views')) {
+                mkdir('/tmp/views', 0755, true);
+            }
+            config(['view.compiled' => '/tmp/views']);
+        }
     }
 }
