@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider {
      */
     public function boot(): void
     {
-        // 1. Настройка путей для кэша во временной папке Vercel
+        // 1. Настройка путей для кэша (у вас уже есть)
         if (config('view.compiled') === '/tmp') {
             if (!is_dir('/tmp/views')) {
                 mkdir('/tmp/views', 0755, true);
@@ -27,9 +27,17 @@ class AppServiceProvider extends ServiceProvider {
             config(['view.compiled' => '/tmp/views']);
         }
 
-        // 2. Принудительный HTTPS для корректной загрузки CSS/JS на Vercel
+        // 2. СОЗДАНИЕ SQLITE БАЗЫ В /TMP
+        if (config('database.default') === 'sqlite') {
+            $dbPath = config('database.connections.sqlite.database');
+            if (!file_exists($dbPath) && str_starts_with($dbPath, '/tmp')) {
+                touch($dbPath);
+            }
+        }
+
+        // 3. HTTPS (обязательно для CSS)
         if (env('APP_ENV') === 'production' || env('VERCEL_ENV')) {
-            URL::forceScheme('https');
+            \Illuminate\Support\Facades\URL::forceScheme('https');
         }
     }
 }
